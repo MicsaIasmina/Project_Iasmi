@@ -20,40 +20,49 @@ const Register = ({ navigation }) => {
   const [accountType, setAccountType] = useState({ value: "user", error: "" });
 
   const register = async () => {
-    const usernameError = usernameValidator(username.value);
-    const emailError = emailValidator(email.value);
-    const passwordError = passwordValidator(password.value);
+    try {
+      const usernameError = usernameValidator(username.value);
+      const emailError = emailValidator(email.value);
+      const passwordError = passwordValidator(password.value);
 
-    if (usernameError || emailError || passwordError) {
-      setUsername({ ...username, error: usernameError });
-      setEmail({ ...email, error: emailError });
-      setPassword({ ...password, error: passwordError });
-      return;
-    }
-    const res = await axios.post("/auth/register", {
-      username: username.value,
-      email: email.value,
-      password: password.value,
-      accountType: accountType.value,
-    });
-    const data = res.data;
-    if (data.userAlreadyExists) {
-      Alert.alert("Ai deja un cont cu acest email.");
-      return;
-    }
+      if (usernameError || emailError || passwordError) {
+        setUsername({ ...username, error: usernameError });
+        setEmail({ ...email, error: emailError });
+        setPassword({ ...password, error: passwordError });
+        return;
+      }
+      const res = await axios.post("/auth/register", {
+        username: username.value,
+        email: email.value,
+        password: password.value,
+        accountType: accountType.value,
+      });
+      const data = res.data;
+      if (data.userAlreadyExists) {
+        Alert.alert("Ai deja un cont cu acest email.");
+        return;
+      }
 
-    if (data.registered) {
-      /* Toast.show("Contul a fost creat cu succes.", {
+      if (data.registered) {
+        /* Toast.show("Contul a fost creat cu succes.", {
         duration: Toast.durations.LONG,
       }); */
+        Toast.show({
+          text1: "Contul a fost creat cu succes.",
+          position: "bottom",
+          visibilityTime: 2000,
+        });
+        setTimeout(() => navigation.navigate("Home"), 2300);
+      }
+    } catch (error) {
+      console.log(error.response.data);
       Toast.show({
-        text1: "Contul a fost creat cu succes.",
+        text1: "A aparut o eroare",
         position: "bottom",
         visibilityTime: 2000,
+        type: "error",
       });
-      setTimeout(() => navigation.navigate("Home"), 2300);
     }
-    //console.log(data);
   };
 
   return (

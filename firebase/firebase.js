@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAskg8BABgzAJK4OuC0XACu7D24uLRBl1Q",
-  authDomain: "sesizari-bd7b0.firebaseapp.com",
-  projectId: "sesizari-bd7b0",
-  storageBucket: "sesizari-bd7b0.appspot.com",
-  messagingSenderId: "917849867475",
-  appId: "1:917849867475:web:d4bc598ea17f25333a0026"
+  apiKey: "AIzaSyCX-g_oik6V12X5K_XFfFrrbdi2ih_aIsM",
+  authDomain: "proiect-sesizari.firebaseapp.com",
+  projectId: "proiect-sesizari",
+  storageBucket: "proiect-sesizari.appspot.com",
+  messagingSenderId: "734505026906",
+  appId: "1:734505026906:web:9c454e54b7ceaa39535f63",
 };
 
 export const FIREBASE_APP = initializeApp(firebaseConfig);

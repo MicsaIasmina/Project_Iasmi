@@ -12,6 +12,7 @@ import LoadingScreen from "../../components/LoadingScreen";
 import LocationIcon from "../../components/LocationIcon";
 import PhotoIcon from "../../components/PhotoIcon";
 import { FIREBASE_STORAGE } from "../../firebase/firebase";
+import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 
 const Add2 = (props) => {
   const { category, subCategory } = props.route.params;
@@ -68,6 +69,7 @@ const Add2 = (props) => {
       aspect: [4, 3],
       quality: 1,
     });
+    console.log(result);
     //console.log(result.base64);
     //console.log(result);
     uploadToFirebase(result.uri);
@@ -79,54 +81,53 @@ const Add2 = (props) => {
   // convertBlobToBase64 = (blob) => Buffer.from(blob).toString("base64");
 
   const uploadToFirebase = async (uri) => {
-    setLoading({
-      loading: true,
-      text: "Se incarca imaginea",
-    });
-    const res = await fetch(uri);
-    const blob = await res.blob();
-    const storageRef = FIREBASE_STORAGE.ref();
-    const username = await AsyncStorage.getItem("username");
-    const imageRef = storageRef.child(
-      `/images/img_${new Date().toString()}${username}`
-    );
-    imageRef.put(blob).on(
-      "state_changed",
-      (snap) => {
-        const progress = Math.round(
-          (snap.bytesTransferred / snap.totalBytes) * 100
-        );
-        //setProgress(progress);
-      },
-      (err) => console.log(err),
-      async () => {
-        const url = await imageRef.getDownloadURL();
-        setImage(url);
-        setLoading({
-          loading: false,
-          text: "",
-        });
-        //console.log(url);
-        //setFinalUrl(url);
-      }
-    );
-    /* const profilePhotosRef = storageRef.child(
-      `/profiles-photos/${props.user_id}-${file.name}`
-    );
-    profilePhotosRef.put(file).on(
-      "state_changed",
-      (snap) => {
-        const progress = Math.round(
-          (snap.bytesTransferred / snap.totalBytes) * 100
-        );
-        setProgress(progress);
-      },
-      (err) => console.log(err),
-      async () => {
-        const url = await profilePhotosRef.getDownloadURL();
-        setFinalUrl(url);
-      }
-    ); */
+    try {
+      setLoading({
+        loading: true,
+        text: "Se incarca imaginea",
+      });
+      const res = await fetch(uri);
+      console.log("res", res.status);
+      const blob = await res.blob();
+      // console.log("blob", blob);
+      const username = await AsyncStorage.getItem("username");
+      const storageRef = ref(
+        FIREBASE_STORAGE,
+        `/images/img_${new Date().toString()}${username}`
+      );
+      console.log("ref", storageRef);
+      const uploadTask = uploadBytesResumable(storageRef, blob);
+      // console.log((await uploadTask).ref);
+      uploadTask.on(
+        "state_changed",
+        (snap) => {
+          const progress = Math.round(
+            (snap.bytesTransferred / snap.totalBytes) * 100
+          );
+          console.log("progress", progress);
+        },
+        (err) => console.log(err),
+        async () => {
+          try {
+            const url = await getDownloadURL(uploadTask.snapshot.ref);
+            setImage(url);
+            setLoading({
+              loading: false,
+              text: "",
+            });
+          } catch (error) {
+            console.error(error);
+          }
+        }
+      );
+    } catch (error) {
+      setLoading({
+        loading: false,
+        text: "",
+      });
+      setImage(null);
+      console.error("error", error);
+    }
   };
 
   const save = async () => {
